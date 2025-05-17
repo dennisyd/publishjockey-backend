@@ -1,4 +1,11 @@
 # SSL Certificates
 *.pem
 *.crt
-*.key 
+*.key
+*.png
+*.jpeg
+*.jpg
+*.md
+*.docx
+*.bat
+*.html 
