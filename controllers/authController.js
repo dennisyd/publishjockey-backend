@@ -154,6 +154,10 @@ const login = async (req, res) => {
       });
     }
     
+    // Update lastLogin timestamp
+    user.lastLogin = new Date();
+    await user.save();
+
     // Generate token
     console.log('Generating JWT token for user:', user._id.toString());
     const token = generateJWT(user);

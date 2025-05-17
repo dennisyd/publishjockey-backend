@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
   },
   subscription: {
     type: String,
-    enum: ['free', 'author', 'starter', 'growth', 'professional', 'power', 'custom'],
+    enum: ['free', 'beta', 'author', 'starter', 'growth', 'professional', 'power', 'custom'],
     default: 'free'
   },
   booksRemaining: {
@@ -123,6 +123,7 @@ UserSchema.methods.comparePassword = async function(candidatePassword) {
 UserSchema.methods.updateBooksAllowance = function() {
   const planLimits = {
     'free': 1,
+    'beta': 1, // Beta users get 1 book, like free users, but do not pay
     'author': 1,
     'starter': 5,
     'growth': 10,
