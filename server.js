@@ -14,6 +14,7 @@ const fs = require('fs');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 const projectRoutes = require('./routes/projectRoutes');
+const stripeRoutes = require('./routes/stripeRoutes');
 
 // Create Express app
 const app = express();
@@ -24,14 +25,24 @@ app.use((req, res, next) => {
   next();
 });
 
+// IMPORTANT: Special handling for Stripe webhook route - must come before body parsers
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/stripe/webhook') {
+    // Use raw body for Stripe webhook validation
+    next();
+  } else {
+    // Use JSON parsing for other routes
+    express.json({ limit: '50mb' })(req, res, next);
+  }
+});
+
 // Basic middleware
 app.use(cors({
   origin: config.cors.origin,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Stripe-Signature']
 }));
-app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // IMPORTANT: Add direct file access route BEFORE any other routes or middleware
@@ -77,6 +88,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', verifyTokenStrict, requireAdmin, adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/stripe', stripeRoutes);
 
 // Add a specific route for file downloads to make absolutely sure it's registered
 app.get('/api/download', verifyToken, (req, res) => {
